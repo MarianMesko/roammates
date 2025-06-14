@@ -1,27 +1,59 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Navbar from '../components/Navbar'
+import { supabase } from '../supabaseClient'
 
 export default function Chat() {
-  const [messages, setMessages] = useState([
-    { id: 1, user: 'Alice', text: 'Hey everyone, ready for the trip?' },
-    { id: 2, user: 'You', text: 'Yes! Super excited 😄' },
-    { id: 3, user: 'Bob', text: 'Got the itinerary, will share soon.' },
-  ])
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const messagesEndRef = useRef(null)
 
+  // Scroll to bottom helper
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  // Fetch existing messages on mount
+  useEffect(() => {
+    fetchMessages()
+    const subscription = supabase
+      .channel('public:messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        setMessages(current => [...current, payload.new])
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(subscription)
+    }
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
-  function sendMessage() {
+  async function fetchMessages() {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: true })
+    if (error) {
+      console.error('Error fetching messages:', error)
+    } else {
+      setMessages(data)
+    }
+  }
+
+  async function sendMessage() {
     if (input.trim() === '') return
-    setMessages(prev => [...prev, { id: Date.now(), user: 'You', text: input }])
-    setInput('')
+
+    const userName = 'You' // For now, static user name
+
+    const { error } = await supabase.from('messages').insert([{ user_name: userName, text: input }])
+    if (error) {
+      console.error('Error sending message:', error)
+    } else {
+      setInput('')
+    }
   }
 
   function handleKeyDown(e) {
@@ -40,18 +72,16 @@ export default function Chat() {
           {messages.map(msg => (
             <div
               key={msg.id}
-              className={`mb-3 flex ${
-                msg.user === 'You' ? 'justify-end' : 'justify-start'
-              }`}
+              className={`mb-3 flex ${msg.user_name === 'You' ? 'justify-end' : 'justify-start'}`}
             >
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
-                  msg.user === 'You'
+                  msg.user_name === 'You'
                     ? 'bg-purple-600 text-white rounded-br-none'
                     : 'bg-gray-200 text-gray-800 rounded-bl-none'
                 }`}
               >
-                <div className="text-sm font-semibold">{msg.user}</div>
+                <div className="text-sm font-semibold">{msg.user_name}</div>
                 <div className="mt-1 whitespace-pre-wrap">{msg.text}</div>
               </div>
             </div>
