@@ -1,122 +1,61 @@
-import { useState, useEffect, useRef } from 'react'
-import Navbar from '../components/Navbar'
-import { supabase } from '../supabaseClient'
+import { useState } from 'react';
+
+const sampleMessages = [
+  { id: 1, user: 'Alice', text: 'Hey everyone! Ready for the trip?', time: '10:00 AM' },
+  { id: 2, user: 'Bob', text: 'Absolutely! Got my bags packed 🎒', time: '10:02 AM' },
+  { id: 3, user: 'Charlie', text: 'Can’t wait to see the itinerary 🗺️', time: '10:05 AM' },
+];
 
 export default function Chat() {
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-  const messagesEndRef = useRef(null)
+  const [messages, setMessages] = useState(sampleMessages);
+  const [input, setInput] = useState('');
 
-  // Scroll to bottom helper
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  // Fetch existing messages on mount
-  useEffect(() => {
-    fetchMessages(){
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: true })
-      if (error) {
-        console.error('Error fetching messages:', error)
-      } else {
-        console.log('Fetched messages:', data) // <-- Add this
-        setMessages(data)
-      }
-    }
-    const subscription = supabase
-      .channel('public:messages')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-        setMessages(current => [...current, payload.new])
-      })
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(subscription)
-    }
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  async function fetchMessages() {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .order('created_at', { ascending: true })
-    if (error) {
-      console.error('Error fetching messages:', error)
-    } else {
-      setMessages(data)
-    }
-  }
-
-  async function sendMessage() {
-    if (input.trim() === '') return
-
-    const userName = 'You' // For now, static user name
-
-    const { error } = await supabase.from('messages').insert([{ user_name: userName, text: input }])
-    if (error) {
-      console.error('Error sending message:', error)
-    } else {
-      setInput('')
-    }
-  }
-
-  function handleKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
+  function sendMessage() {
+    if (!input.trim()) return;
+    const newMessage = {
+      id: Date.now(),
+      user: 'You',
+      text: input,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages([...messages, newMessage]);
+    setInput('');
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="max-w-4xl mx-auto p-6 flex flex-col h-[80vh]">
-        <h1 className="text-3xl font-bold mb-4">💬 Group Chat</h1>
-        <div className="flex-1 overflow-y-auto border rounded-lg p-4 bg-white shadow">
-          {messages.map(msg => (
+    <div className="flex flex-col h-full p-4">
+      <div className="flex-1 overflow-y-auto mb-4 bg-white rounded shadow p-4">
+        {messages.map(({ id, user, text, time }) => (
+          <div key={id} className={`mb-3 flex ${user === 'You' ? 'justify-end' : 'justify-start'}`}>
             <div
-              key={msg.id}
-              className={`mb-3 flex ${msg.user_name === 'You' ? 'justify-end' : 'justify-start'}`}
+              className={`max-w-xs px-4 py-2 rounded-lg ${
+                user === 'You' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'
+              }`}
             >
-              <div
-                className={`max-w-xs px-4 py-2 rounded-lg ${
-                  msg.user_name === 'You'
-                    ? 'bg-purple-600 text-white rounded-br-none'
-                    : 'bg-gray-200 text-gray-800 rounded-bl-none'
-                }`}
-              >
-                <div className="text-sm font-semibold">{msg.user_name}</div>
-                <div className="mt-1 whitespace-pre-wrap">{msg.text}</div>
-              </div>
+              <div className="text-sm font-semibold">{user}</div>
+              <div>{text}</div>
+              <div className="text-xs text-right opacity-60">{time}</div>
             </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className="mt-4 flex gap-2">
-          <textarea
-            rows={2}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            className="flex-1 resize-none border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
-          />
-          <button
-            onClick={sendMessage}
-            className="bg-purple-600 text-white px-5 py-2 rounded-md hover:bg-purple-700 transition"
-          >
-            Send
-          </button>
-        </div>
+          </div>
+        ))}
       </div>
-    </>
-  )
+
+      <div className="flex space-x-2">
+        <input
+          type="text"
+          placeholder="Type your message..."
+          className="flex-1 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+        />
+        <button
+          onClick={sendMessage}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
 }
