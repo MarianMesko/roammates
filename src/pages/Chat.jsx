@@ -14,7 +14,18 @@ export default function Chat() {
 
   // Fetch existing messages on mount
   useEffect(() => {
-    fetchMessages()
+    fetchMessages(){
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: true })
+      if (error) {
+        console.error('Error fetching messages:', error)
+      } else {
+        console.log('Fetched messages:', data) // <-- Add this
+        setMessages(data)
+      }
+    }
     const subscription = supabase
       .channel('public:messages')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
