@@ -29,51 +29,52 @@ export default function App() {
       </section>
 
       <section id="features" className="py-20 px-6 bg-gray-50">
-  <div className="max-w-6xl mx-auto text-center mb-12">
-    <h2 className="text-4xl font-bold text-gray-800">Your Group Travel Toolkit</h2>
-    <p className="mt-4 text-lg text-gray-600">Everything you need to plan, share, and enjoy your trip—together.</p>
-  </div>
-  <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-    {[
-      {
-        title: "Group Chat",
-        desc: "Centralized group conversation to coordinate, share updates, and have fun.",
-        emoji: "💬"
-      },
-      {
-        title: "Activity Polls",
-        desc: "Let everyone vote on what to do next. Instant democracy.",
-        emoji: "📊"
-      },
-      {
-        title: "Itinerary + Timeline",
-        desc: "Organize all your activities, bookings, and plans in one shared view.",
-        emoji: "🗺️"
-      },
-      {
-        title: "Expense Sharing",
-        desc: "Split costs automatically and track who owes what.",
-        emoji: "💸"
-      },
-      {
-        title: "Photo Sharing",
-        desc: "Upload and view memories from all participants in one place.",
-        emoji: "📸"
-      },
-      {
-        title: "More Coming!",
-        desc: "Feedback forms, restaurant suggestions, shared maps—stay tuned.",
-        emoji: "✨"
-      }
-    ].map((feat, i) => (
-      <div key={i} className="bg-white rounded-xl shadow-md p-6 text-left hover:shadow-lg transition">
-        <div className="text-5xl mb-4">{feat.emoji}</div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">{feat.title}</h3>
-        <p className="text-gray-600">{feat.desc}</p>
-      </div>
-    ))}
-  </div>
-</section>
+        <div className="max-w-6xl mx-auto text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-800">Your Group Travel Toolkit</h2>
+          <p className="mt-4 text-lg text-gray-600">Everything you need to plan, share, and enjoy your trip—together.</p>
+        </div>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {[
+            {
+              title: "Group Chat",
+              desc: "Centralized group conversation to coordinate, share updates, and have fun.",
+              emoji: "💬"
+            },
+            {
+              title: "Activity Polls",
+              desc: "Let everyone vote on what to do next. Instant democracy.",
+              emoji: "📊"
+            },
+            {
+              title: "Itinerary + Timeline",
+              desc: "Organize all your activities, bookings, and plans in one shared view.",
+              emoji: "🗺️"
+            },
+            {
+              title: "Expense Sharing",
+              desc: "Split costs automatically and track who owes what.",
+              emoji: "💸"
+            },
+            {
+              title: "Photo Sharing",
+              desc: "Upload and view memories from all participants in one place.",
+              emoji: "📸"
+            },
+            {
+              title: "More Coming!",
+              desc: "Feedback forms, restaurant suggestions, shared maps—stay tuned.",
+              emoji: "✨"
+            }
+          ].map((feat, i) => (
+            <div key={i} className="bg-white rounded-xl shadow-md p-6 text-left hover:shadow-lg transition">
+              <div className="text-5xl mb-4">{feat.emoji}</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{feat.title}</h3>
+              <p className="text-gray-600">{feat.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
 
 
       <footer id="contact" className="bg-white py-10 text-center text-gray-600">
